@@ -10,14 +10,14 @@ use Monolog\Logger;
 class AliyunSlsBufferHandler extends BufferHandler
 {
 
-    public function __construct($app, array $handlerConfig, int $bufferLimit = 0, $level = Logger::DEBUG, bool $bubble = true)
+    public function __construct(array $handlerConfig, int $bufferLimit = 0, $level = Logger::DEBUG, bool $bubble = true)
     {
-        parent::__construct($this->makeHandler($app, $handlerConfig), $bufferLimit, $level, $bubble, true);
+        parent::__construct($this->makeHandler($handlerConfig), $bufferLimit, $level, $bubble, true);
     }
 
-    private function makeHandler($app, array $config): HandlerInterface
+    private function makeHandler(array $config): HandlerInterface
     {
-        $manager = new Manager($app);
+        $manager = new Manager(app());
         return $manager->makeHandler($config);
     }
 

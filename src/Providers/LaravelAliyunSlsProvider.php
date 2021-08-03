@@ -24,7 +24,6 @@ class LaravelAliyunSlsProvider extends ServiceProvider
             'driver' => 'monolog',
             'handler' => AliyunSlsBufferHandler::class,
             'handler_with' => [
-                'app' => $this->app,
                 'handlerConfig' => [
                     'handler' => AliyunSlsHandler::class,
                     'handler_with' => [
