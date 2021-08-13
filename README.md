@@ -36,6 +36,7 @@ return [
         'project' => env('ALIYUN_LOG_PROJECT'),
         'logstore' => env('ALIYUN_LOG_LOGSTORE'),
         'bufferLimit' => env('ALIYUN_LOG_BUFFER_LIMIT', 5),
+        'formatter' => \Islenbo\LaravelAliyunSls\Formatters\AliyunSlsFormatter::class
     ],
 
     // ...

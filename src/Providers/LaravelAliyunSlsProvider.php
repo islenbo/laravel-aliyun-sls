@@ -10,6 +10,15 @@ use Islenbo\LaravelAliyunSls\Handlers\AliyunSlsHandler;
 
 class LaravelAliyunSlsProvider extends ServiceProvider
 {
+    /** @var Repository */
+    private $config;
+
+    public function __construct($app)
+    {
+        parent::__construct($app);
+        $this->config = $this->app->get('config');
+    }
+
     /**
      * Register services.
      *
@@ -17,10 +26,22 @@ class LaravelAliyunSlsProvider extends ServiceProvider
      */
     public function register()
     {
-        /** @var Repository $config */
-        $config = $this->app->get('config');
-        $slsConfig = $config->get('logging.aliyun-sls');
-        $config->set('logging.channels.aliyun-sls', [
+        $this->config->set('logging.channels.aliyun-sls', $this->getChannel());
+    }
+
+    /**
+     * Bootstrap services.
+     *
+     * @return void
+     */
+    public function boot()
+    {
+    }
+
+    private function getChannel(): array
+    {
+        $slsConfig = $this->config->get('logging.aliyun-sls');
+        return [
             'driver' => 'monolog',
             'handler' => AliyunSlsBufferHandler::class,
             'handler_with' => [
@@ -36,16 +57,7 @@ class LaravelAliyunSlsProvider extends ServiceProvider
                 ],
                 'bufferLimit' => $slsConfig['bufferLimit'],
             ],
-            'formatter' => AliyunSlsFormatter::class,
-        ]);
-    }
-
-    /**
-     * Bootstrap services.
-     *
-     * @return void
-     */
-    public function boot()
-    {
+            'formatter' => class_exists($slsConfig['formatter']) ? $slsConfig['formatter'] : AliyunSlsFormatter::class,
+        ];
     }
 }
