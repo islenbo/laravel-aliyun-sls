@@ -6,6 +6,7 @@ use Aliyun_Log_Models_LogItem;
 use Illuminate\Support\Arr;
 use Monolog\DateTimeImmutable;
 use Monolog\Formatter\FormatterInterface;
+use Throwable;
 
 class AliyunSlsFormatter implements FormatterInterface
 {
@@ -16,9 +17,9 @@ class AliyunSlsFormatter implements FormatterInterface
         $datetime = $record['datetime'];
         $uid = Arr::pull($record, 'extra.uid', '');
 
-        $logItem = new Aliyun_Log_Models_LogItem();
-        $logItem->setTime($datetime->getTimestamp());
-        $logItem->setContents([
+        $result = new Aliyun_Log_Models_LogItem();
+        $result->setTime($datetime->getTimestamp());
+        $result->setContents([
             'message' => $record['message'],
             'level' => $record['level_name'],
             'env' => $record['channel'],
@@ -27,7 +28,7 @@ class AliyunSlsFormatter implements FormatterInterface
             'extra' => $this->convert($record['extra']),
         ]);
 
-        return $logItem;
+        return $result;
     }
 
     public function formatBatch(array $records)
@@ -41,11 +42,20 @@ class AliyunSlsFormatter implements FormatterInterface
 
     private function convert(array $data): string
     {
-        $newData = [];
+        $result = [];
         foreach ($data as $k => $v) {
-            $newData[] = $k . ':' . json_encode($v, JSON_UNESCAPED_UNICODE);
+            if ($v instanceof Throwable) {
+                $result[] = $k . ':'. $this->formatException($v);
+            } else {
+                $result[] = $k . ':' . json_encode($v, JSON_UNESCAPED_UNICODE);
+            }
         }
 
-        return implode(PHP_EOL, $newData);
+        return implode(PHP_EOL, $result);
+    }
+
+    private function formatException(Throwable $e): string
+    {
+        return "[{$e->getCode()}] {$e->getMessage()}\n{$e->getFile()}:{$e->getLine()}\n{$e->getTraceAsString()}";
     }
 }
