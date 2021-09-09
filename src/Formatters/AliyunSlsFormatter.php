@@ -54,8 +54,24 @@ class AliyunSlsFormatter implements FormatterInterface
         return implode(PHP_EOL, $result);
     }
 
-    private function formatException(Throwable $e): string
+    public function formatException(Throwable $e): string
     {
-        return "[{$e->getCode()}] {$e->getMessage()}\n{$e->getFile()}:{$e->getLine()}\n{$e->getTraceAsString()}";
+        $str = "[{$e->getCode()}] {$e->getMessage()}\n{$e->getFile()}:{$e->getLine()}\n{$e->getTraceAsString()}\n";
+        $previous = $e->getPrevious();
+        if ($previous instanceof Throwable) {
+            $str .= $this->getPreviousException($previous);
+        }
+        return $str;
+    }
+
+    public function getPreviousException(Throwable $e): string
+    {
+        $str = "\n[previous exception][{$e->getCode()}] {$e->getMessage()}\n{$e->getFile()}:{$e->getLine()}\n{$e->getTraceAsString()}\n";
+
+        $previous = $e->getPrevious();
+        if ($previous instanceof Throwable) {
+            $str .= $this->getPreviousException($previous);
+        }
+        return $str;
     }
 }
