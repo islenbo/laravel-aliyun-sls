@@ -56,10 +56,10 @@ class AliyunSlsFormatter implements FormatterInterface
 
     public function formatException(Throwable $e): string
     {
-        $str = "[{$e->getCode()}] {$e->getMessage()}\n{$e->getFile()}:{$e->getLine()}\n{$e->getTraceAsString()}\n";
+        $str = "[{$e->getCode()}] {$e->getMessage()}\n{$e->getFile()}:{$e->getLine()}\n{$e->getTraceAsString()}";
         if ($previous = $e->getPrevious()) {
             do {
-                $str .= "[previous exception][{$previous->getCode()}] {$previous->getMessage()}\n{$previous->getFile()}:{$previous->getLine()}\n{$previous->getTraceAsString()}\n";
+                $str .= "\n[previous exception][{$previous->getCode()}] {$previous->getMessage()}\n{$previous->getFile()}:{$previous->getLine()}\n{$previous->getTraceAsString()}";
             } while ($previous = $previous->getPrevious());
         }
         return $str;
