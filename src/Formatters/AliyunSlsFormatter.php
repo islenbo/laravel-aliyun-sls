@@ -10,6 +10,12 @@ use Throwable;
 
 class AliyunSlsFormatter implements FormatterInterface
 {
+    /**
+     * 最大前异常深度
+     * @var int
+     */
+    protected $maxPreviousExceptionDepth = 2;
+
 
     public function format(array $record)
     {
@@ -54,8 +60,15 @@ class AliyunSlsFormatter implements FormatterInterface
         return implode(PHP_EOL, $result);
     }
 
-    private function formatException(Throwable $e): string
+    public function formatException(Throwable $e, bool $isPrevious = false, int $previousDepth = 0): string
     {
-        return "[{$e->getCode()}] {$e->getMessage()}\n{$e->getFile()}:{$e->getLine()}\n{$e->getTraceAsString()}";
+        $str = $isPrevious ? "\n[previous exception]" : '';
+        $str .= "[{$e->getCode()}] {$e->getMessage()}\n{$e->getFile()}:{$e->getLine()}\n{$e->getTraceAsString()}\n";
+
+        $previous = $e->getPrevious();
+        if ($previous instanceof Throwable && $previousDepth < $this->maxPreviousExceptionDepth) {
+            $str .= $this->formatException($previous, true, ++$previousDepth);
+        }
+        return $str;
     }
 }
